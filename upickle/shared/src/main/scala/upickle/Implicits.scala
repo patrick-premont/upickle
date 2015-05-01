@@ -86,12 +86,11 @@ trait Implicits extends Types {
   implicit val DoubleRW = NumericReadWriter(_.toDouble, _.toDouble)
 
   import collection.generic.CanBuildFrom
-  implicit def SeqishR[T: R, V[_]]
-                       (implicit cbf: CanBuildFrom[Nothing, T, V[T]]): R[V[T]] = R[V[T]](
+  implicit def SeqishR[T, V[_]]
+                       (implicit cbf: CanBuildFrom[Nothing, T, V[T]], t: R[T]): R[V[T]] = R[V[T]](
     Internal.validate("Array(n)"){case Js.Arr(x@_*) => x.map(readJs[T]).to[V]}
   )
-
-  implicit def SeqishW[T: W, V[_] <: Iterable[_]]: W[V[T]] = W[V[T]]{
+  implicit def SeqishW[T, V[_]](implicit v: V[_] <:< Iterable[_], t: W[T]): W[V[T]] = W[V[T]]{
     (x: V[T]) => Js.Arr(x.iterator.asInstanceOf[Iterator[T]].map(writeJs(_)).toArray:_*)
   }
 
@@ -109,8 +108,8 @@ trait Implicits extends Types {
   implicit def SomeR[T: R] = R[Some[T]](OptionR[T].read andThen (_.asInstanceOf[Some[T]]))
   implicit def NoneR: R[None.type] = R[None.type](OptionR[Int].read andThen (_.asInstanceOf[None.type]))
 
-  implicit def ArrayW[T: W: ClassTag] = SeqLikeW[T, Array](Array.unapplySeq)
-  implicit def ArrayR[T: R: ClassTag] = SeqLikeR[T, Array](x => Array.apply(x:_*))
+  implicit def ArrayW[T: W: ClassTag] : W[Array[T]] = SeqLikeW[T, Array](Array.unapplySeq)
+  implicit def ArrayR[T: R: ClassTag] : R[Array[T]] = SeqLikeR[T, Array](x => Array.apply(x:_*))
 
   implicit def MapW[K: W, V: W]: W[Map[K, V]] =
     if (implicitly[W[K]] == implicitly[W[String]])

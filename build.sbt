@@ -1,9 +1,9 @@
 crossScalaVersions := Seq("2.10.4", "2.11.4")
 
 val upickle = crossProject.settings(
-  organization := "com.lihaoyi",
+  organization := "com.boldradius",
   version := repo.version,
-  scalaVersion := "2.10.4",
+  scalaVersion := "2.11.6",
   name := "upickle",
   scalacOptions := Seq("-unchecked",
     "-deprecation",
@@ -11,9 +11,10 @@ val upickle = crossProject.settings(
     "-feature"),
   // Sonatype
   publishArtifact in Test := false,
-  publishTo <<= version { (v: String) =>
-    Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
-  },
+  //publishTo <<= version { (v: String) =>
+  //  Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+  //},
+
   testFrameworks += new TestFramework("utest.runner.Framework"),
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "acyclic" % "0.1.2" % "provided",
@@ -114,11 +115,3 @@ val upickle = crossProject.settings(
 lazy val upickleJS = upickle.js
 lazy val upickleJVM = upickle.jvm
 
-lazy val readme = scalatex.ScalatexReadme(
-  projectId = "readme",
-  wd = file(""),
-  url = "https://github.com/lihaoyi/upickle/tree/master",
-  source = "Readme"
-).settings(
-  (unmanagedSources in Compile) += baseDirectory.value/".."/"project"/"repo.scala"
-)
